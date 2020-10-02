@@ -1,10 +1,10 @@
 package io.lamden.api;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.List;
 
 public interface Network {
     String getName();
-    List<URL> getMasterNodes();
-    void setMasterNodes(List<URL> masternodes);
+    List<URI> getMasterNodes();
+    void setMasterNodes(List<URI> masternodes);
 }

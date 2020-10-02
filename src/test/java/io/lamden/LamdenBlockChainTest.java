@@ -1,6 +1,5 @@
 package io.lamden;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.lamden.api.MainNet;
 import io.lamden.api.Network;
 import io.lamden.api.TestNet;
@@ -12,8 +11,9 @@ import io.lamden.api.json.method.MethodsResult;
 import io.lamden.api.json.transaction.TransactionResult;
 import io.lamden.api.json.value.ValueResult;
 import io.lamden.blockchain.LamdenBlockChain;
-import io.lamden.blockchain.TransactionSender;
 import io.lamden.blockchain.TransactionInfo;
+import io.lamden.blockchain.TransactionSender;
+import io.lamden.exception.MasternodesNotAvailableException;
 import io.lamden.wallet.KeyPair;
 import io.lamden.wallet.LamdenWallet;
 import org.junit.jupiter.api.Assertions;
@@ -21,8 +21,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.net.URL;
-import java.time.Instant;
+import java.net.URI;
 import java.util.*;
 
 class LamdenBlockChainTest {
@@ -166,18 +165,28 @@ class LamdenBlockChainTest {
     }
 
     @Test
-    void pingServer_wrongHost_returnsFalse() throws Exception{
+    void readContractInfo_allWrongHosts_throwsException() throws Exception{
         //Arrange
         Network myNetwork = new MainNet();
-        myNetwork.setMasterNodes(Arrays.asList(new URL("https://masternode-01.lambo.io")));
+        myNetwork.setMasterNodes(
+                Arrays.asList(
+                        new URI("https://masternode-01.lambo.io"),
+                        new URI("https://masternode-02.lambo.io"),
+                        new URI("https://masternode-03.lambo.io")
+                        )
+        );
 
         LamdenBlockChain testee = new LamdenBlockChain(myNetwork);
+        String contractName = "currency";
 
         //Act
-        boolean result = testee.pingServer();
+        MasternodesNotAvailableException exception = Assertions.assertThrows(MasternodesNotAvailableException.class, () -> {
+            testee.readContractInfo(contractName);
+        });
 
         //Assert
-        Assertions.assertFalse(result);
+        Assertions.assertTrue(exception.getMessage().endsWith(" could not be processed despite 2 retries!"));
+
     }
 
     @Test

@@ -5,10 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.lamden.api.datatypes.FloatValue;
 import io.lamden.api.json.contract.ContractInfoResult;
 import io.lamden.api.json.method.MethodsResult;
-import io.lamden.api.json.value.ValueResult;
-import io.lamden.exception.RequestFailedException;
 import io.lamden.api.json.nonce.NonceResult;
 import io.lamden.api.json.transaction.TransactionResult;
+import io.lamden.exception.MasternodesNotAvailableException;
+import io.lamden.exception.RequestFailedException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
@@ -16,6 +16,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -24,8 +25,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Slf4j
 public class MasterNodeApi {
@@ -38,15 +45,15 @@ public class MasterNodeApi {
     }
 
     public NonceResult readNonce(String senderPublicKey) {
-        String host = network.getMasterNodes().get(0).toString();
-        HttpGet request = new HttpGet( host + "/nonce/" + senderPublicKey);
+        URI uri = network.getMasterNodes().get(0);
+        HttpGet request = new HttpGet(uri.resolve("/nonce/" + senderPublicKey));
 
         return send(request, NonceResult.class);
     }
 
     public TransactionResult readTransaction(String hash) {
-        String host = network.getMasterNodes().get(0).toString();
-        HttpGet request = new HttpGet( host + "/tx?hash=" + hash);
+        URI uri = network.getMasterNodes().get(0);
+        HttpGet request = new HttpGet( uri.resolve("/tx?hash=" + hash));
 
         try{
             return send(request, TransactionResult.class);
@@ -58,7 +65,6 @@ public class MasterNodeApi {
                 throw e;
             }
         }
-
     }
 
     @SuppressWarnings("unchecked")
@@ -76,20 +82,68 @@ public class MasterNodeApi {
     }
 
     public <T> T send(HttpRequestBase request, Class<T> targetType) {
-        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-            try (CloseableHttpResponse response = client.execute(request)) {
-                StatusLine statusLine = response.getStatusLine();
-                String content = readInputStream(response.getEntity().getContent());
-                if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-                    return mapper.readValue(content, targetType);
-                }else{
-                    log.error("Request failed with message: " + content);
-                    throw new RequestFailedException("Http request did not respond with Code 200 (returned " + statusLine.getStatusCode() + "), please take a look at the response details", statusLine.getStatusCode(),  content);
+
+        final MasterNodeRequest<T> masterNodeRequest = (HttpRequestBase newRequest) -> {
+            try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+                try (CloseableHttpResponse response = client.execute(request)) {
+                    StatusLine statusLine = response.getStatusLine();
+                    String content = readInputStream(response.getEntity().getContent());
+                    if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+                        return mapper.readValue(content, targetType);
+                    }else{
+                        log.error("Request failed with message: " + content);
+                        throw new RequestFailedException("Http request did not respond with Code 200 (returned " + statusLine.getStatusCode() + "), please take a look at the response details", statusLine.getStatusCode(),  content);
+                    }
                 }
             }
-        }catch(IOException e){
-            throw new RequestFailedException("Failure while processing http request", e);
+        };
+
+        return runWithRetries(network.getMasterNodes(), request, masterNodeRequest ,targetType);
+
+    }
+
+    <T> T runWithRetries(List<URI> masterNodes, HttpRequestBase request, MasterNodeRequest<T> t, Class<T> targetType) {
+
+        List<Integer> indexes = IntStream.rangeClosed(0, masterNodes.size()-1).boxed().collect(Collectors.toList());
+        Collections.shuffle(indexes);
+
+        URI uri = request.getURI();
+
+        for (int i = 0; i < indexes.size(); i++) {
+
+            int currentIndex = indexes.get(i);
+
+            URI newUri = null;
+
+            try {
+                newUri = replaceHost(uri, masterNodes.get(currentIndex).getHost());
+                request.setURI(newUri);
+                return t.call(request);
+
+            } catch (URISyntaxException e) {
+                throw new IllegalArgumentException("URI is not valid: " + uri);
+            } catch (IOException e){
+
+                int leftRetries = indexes.size() - 1 - i;
+                if (leftRetries == 0){
+                    //No more retries left
+                    throw new MasternodesNotAvailableException("Request "+ newUri.toString() +" could not be processed despite "+ (indexes.size() -1) +" retries!", e);
+                }else{
+                    log.info("Request failed: {}", newUri);
+                    log.info("{} retries left", leftRetries);
+                }
+            }
         }
+
+        throw new IllegalStateException("Request "+ uri.toString() +" not failed, but also not successful --> illegal state");
+
+    }
+
+
+    private URI replaceHost(URI uri, String newHostName) throws URISyntaxException {
+        URIBuilder builder = new URIBuilder(uri.toString());
+        builder.setHost(newHostName);
+        return builder.build();
     }
 
     private String readInputStream(InputStream inputStream) throws IOException {
@@ -107,8 +161,8 @@ public class MasterNodeApi {
     }
 
     public ContractInfoResult readContractInfo(String contractName) {
-        String host = network.getMasterNodes().get(0).toString();
-        HttpGet request = new HttpGet( host + "/contracts/" + contractName);
+        URI uri = network.getMasterNodes().get(0);
+        HttpGet request = new HttpGet( uri.resolve("/contracts/" + contractName));
 
         try{
             return send(request, ContractInfoResult.class);
@@ -122,13 +176,15 @@ public class MasterNodeApi {
     }
 
     public <T> T readVariable(String contractName, String variableName, String params, Class<T> resultType) {
-        String host = network.getMasterNodes().get(0).toString();
-        String url = host + "/contracts/" + contractName + "/" + variableName;
+        URI uri = network.getMasterNodes().get(0);
+
         if (params != null && !params.trim().isEmpty()){
-            url += "?key=" + params;
+            uri = uri.resolve("/contracts/" + contractName + "/" + variableName + "?key=" + params);
+        }else{
+            uri = uri.resolve("/contracts/" + contractName + "/" + variableName);
         }
 
-        HttpGet request = new HttpGet( url);
+        HttpGet request = new HttpGet(uri);
 
         try{
             return send(request, resultType);
@@ -142,8 +198,8 @@ public class MasterNodeApi {
     }
 
     public MethodsResult readContractMethods(String contractName) {
-        String host = network.getMasterNodes().get(0).toString();
-        HttpGet request = new HttpGet( host + "/contracts/" + contractName + "/methods");
+        URI uri = network.getMasterNodes().get(0);
+        HttpGet request = new HttpGet(uri.resolve("/contracts/" + contractName + "/methods"));
 
         try{
             return send(request, MethodsResult.class);
@@ -157,8 +213,8 @@ public class MasterNodeApi {
     }
 
     public boolean pingServer() {
-        String host = network.getMasterNodes().get(0).toString();
-        HttpGet request = new HttpGet( host + "/ping/");
+        URI uri = network.getMasterNodes().get(0);
+        HttpGet request = new HttpGet( uri.resolve("/ping/"));
 
         try{
             send(request, Void.class);
