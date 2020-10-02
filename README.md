@@ -46,7 +46,7 @@ boolean verificationResult = wallet.verifyMessage(keyPair.getPublicKey(), messag
 
 ## Interacting with the blockchain
 
-First you need to defined, with which network you want to interact
+First you need to defined, which network you want to interact to. 
 Therefore you need create a `Network` instance first.
 Actually there are two predefined network classes with the current active masternodes defined: `MainNet` and `TestNet`
 
@@ -123,7 +123,7 @@ To make this code running, you need to fund the generated public key with some d
 Copy the generated public key `b30aa7639eb57a084e82746c338ec663053f976c5c70ff605d37157649c874bb` and 
 submit it to the [Lamden Faucet](https://faucet.lamden.io)
 
-This code will call the `currency` contract and send 5 dTAU to `919c1cb656873574ccbe4cfbaf968a480140bc4b7c6d3bc2531f17fb272322a6`
+The following code will call the `currency` contract and send 5 dTAU from `b30aa7639eb57a084e82746c338ec663053f976c5c70ff605d37157649c874bb` to `919c1cb656873574ccbe4cfbaf968a480140bc4b7c6d3bc2531f17fb272322a6`
 
 ```java
 LamdenWallet wallet = new LamdenWallet();
