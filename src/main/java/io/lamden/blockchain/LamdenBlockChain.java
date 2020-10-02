@@ -6,7 +6,6 @@ import io.lamden.api.json.contract.ContractInfoResult;
 import io.lamden.api.json.method.MethodsResult;
 import io.lamden.api.json.transaction.TransactionResult;
 import io.lamden.api.json.value.ValueResult;
-import sun.rmi.rmic.iiop.ValueType;
 
 import java.math.BigDecimal;
 
