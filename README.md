@@ -41,7 +41,7 @@ System.out.println("Public Key: " + keyPair.getPublicKey());
 ```java
 String message = "this is my message i want to sign";
 String signature = wallet.signMessage(keyPair.getPrivateKey(), message);
-boolean verificationResult = testee.verifyMessage(keyPair.getPublicKey(), message, signature);
+boolean verificationResult = wallet.verifyMessage(keyPair.getPublicKey(), message, signature);
 ```
 
 ## Interacting with the blockchain
@@ -126,8 +126,8 @@ submit it to the [Lamden Faucet](https://faucet.lamden.io)
 This code will call the `currency` contract and send 5 dTAU to `919c1cb656873574ccbe4cfbaf968a480140bc4b7c6d3bc2531f17fb272322a6`
 
 ```java
-LamdenWallet testee = new LamdenWallet();
-KeyPair keyPair = testee.generateKeyPairFromPrivateKey("c3a542e8a03067781f6b1352bf9b3fbeb65c6fa54cf0da5b1815a477ea656147");
+LamdenWallet wallet = new LamdenWallet();
+KeyPair keyPair = wallet.generateKeyPairFromPrivateKey("c3a542e8a03067781f6b1352bf9b3fbeb65c6fa54cf0da5b1815a477ea656147");
 String publicKey = keyPair.getPublicKey();
 //generated publicKey: b30aa7639eb57a084e82746c338ec663053f976c5c70ff605d37157649c874bb
 
