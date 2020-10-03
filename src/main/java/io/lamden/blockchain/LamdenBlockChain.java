@@ -1,14 +1,11 @@
 package io.lamden.blockchain;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.lamden.api.MasterNodeApi;
 import io.lamden.api.Network;
 import io.lamden.api.datatypes.GenericValue;
 import io.lamden.api.json.contract.ContractInfoResult;
 import io.lamden.api.json.method.MethodsResult;
 import io.lamden.api.json.transaction.TransactionResult;
-import io.lamden.api.json.value.ValueResult;
 
 import java.math.BigDecimal;
 
@@ -67,8 +64,8 @@ public class LamdenBlockChain {
      * @return the <tt>ValueResult</tt> if the read operation was successful.
      * If the contract or the variable was not found <tt>null</tt> will be returned
      */
-    public ValueResult readVariable(String contractName, String variableName){
-        return readVariable(contractName, variableName, ValueResult.class);
+    public GenericValue readVariable(String contractName, String variableName){
+        return readVariable(contractName, variableName, GenericValue.class);
     }
 
     /**
@@ -79,7 +76,7 @@ public class LamdenBlockChain {
      * @return the <tt>ValueResult</tt> if the read operation was successful.
      * If the contract or the variable was not found <tt>null</tt> will be returned
      */
-    public <T> T readVariable(String contractName, String variableName, Class<T> resultType){
+    public <T extends GenericValue> T readVariable(String contractName, String variableName, Class<T> resultType){
         return readVariable(contractName, variableName, null, resultType);
     }
 
@@ -105,7 +102,7 @@ public class LamdenBlockChain {
      * @return the <tt>ValueResult</tt> if the read operation was successful.
      * If the contract, the variable or the param was not found <tt>null</tt> will be returned
      */
-    public <T> T readVariable(String contractName, String variableName, String params, Class<T> resultType){
+    public <T extends GenericValue> T readVariable(String contractName, String variableName, String params, Class<T> resultType){
         MasterNodeApi masterNodeApi = new MasterNodeApi(network);
         return masterNodeApi.readVariable(contractName, variableName, params, resultType);
     }

@@ -8,18 +8,17 @@ import java.io.IOException;
 
 class TimeDeltaValueSerializer extends JsonSerializer<TimeDeltaValue> {
 
-
-
     @Override
     public void serialize(TimeDeltaValue timeDeltaValue, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+        TimeDelta timeDelta = timeDeltaValue.getValue();
         int[] timeDeltaArray = new int[]{
-                timeDeltaValue.getDays(),
-                timeDeltaValue.getSeconds(),
-                timeDeltaValue.getMicroseconds(),
-                timeDeltaValue.getMilliseconds(),
-                timeDeltaValue.getMinutes(),
-                timeDeltaValue.getHours(),
-                timeDeltaValue.getWeeks()};
+                timeDelta.getDays(),
+                timeDelta.getSeconds(),
+                timeDelta.getMicroseconds(),
+                timeDelta.getMilliseconds(),
+                timeDelta.getMinutes(),
+                timeDelta.getHours(),
+                timeDelta.getWeeks()};
 
         jsonGenerator.writeArray(timeDeltaArray, 0, timeDeltaArray.length);
     }

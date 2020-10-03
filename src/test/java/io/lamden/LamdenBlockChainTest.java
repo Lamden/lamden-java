@@ -7,7 +7,6 @@ import io.lamden.api.datatypes.*;
 import io.lamden.api.json.contract.ContractInfoResult;
 import io.lamden.api.json.method.MethodsResult;
 import io.lamden.api.json.transaction.TransactionResult;
-import io.lamden.api.json.value.ValueResult;
 import io.lamden.blockchain.LamdenBlockChain;
 import io.lamden.blockchain.TransactionInfo;
 import io.lamden.blockchain.TransactionSender;
@@ -100,7 +99,7 @@ class LamdenBlockChainTest {
         String variable = "misterx";
 
         //Act
-        ValueResult result = testee.readVariable(contractName, variable);
+        GenericValue<String> result = testee.readVariable(contractName, variable);
 
         //Assert
         Assertions.assertNull(result);
@@ -280,12 +279,12 @@ class LamdenBlockChainTest {
 
         //Test - TimeDelta
         TimeDeltaValue timeDeltaValue = testee.readVariable(contractName, "S", "lamden-java-testing,TimeDelta", TimeDeltaValue.class);
-        Assertions.assertEquals(1, timeDeltaValue.getWeeks());
+        Assertions.assertEquals(1, timeDeltaValue.getValue().getWeeks());
 
     }
 
     @Test
-    //@Disabled("Cannot send transaction because of missing funds on testnet")
+    @Disabled("Cannot send transaction because of missing funds on testnet")
     void sendTransaction() {
         LamdenWallet testee = new LamdenWallet();
         KeyPair keyPair = testee.generateKeyPairFromPrivateKey("c3a542e8a03067781f6b1352bf9b3fbeb65c6fa54cf0da5b1815a477ea656147");
