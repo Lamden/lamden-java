@@ -21,7 +21,7 @@ public class RequestFailedException extends RuntimeException{
         return response;
     }
 
-    public int getStatusCode() {
+    public Integer getStatusCode() {
         return statusCode;
     }
 }

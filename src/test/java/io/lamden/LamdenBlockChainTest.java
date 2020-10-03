@@ -3,9 +3,7 @@ package io.lamden;
 import io.lamden.api.MainNet;
 import io.lamden.api.Network;
 import io.lamden.api.TestNet;
-import io.lamden.api.datatypes.DateTimeValue;
-import io.lamden.api.datatypes.FloatValue;
-import io.lamden.api.datatypes.TimeDeltaValue;
+import io.lamden.api.datatypes.*;
 import io.lamden.api.json.contract.ContractInfoResult;
 import io.lamden.api.json.method.MethodsResult;
 import io.lamden.api.json.transaction.TransactionResult;
@@ -117,7 +115,7 @@ class LamdenBlockChainTest {
         String address = "0000803efd5df09c75c0c6670742db5074e5a011b829dfd8a0c50726d263a345";
 
         //Act
-        ValueResult result = testee.readVariable(contractName, variable, address);
+        GenericValue result = testee.readVariable(contractName, variable, address);
 
 
         //Assert
@@ -215,7 +213,79 @@ class LamdenBlockChainTest {
 
 
     @Test
-    @Disabled("Cannot send transaction because of missing funds on testnet")
+    void readVariables_ofAllTypes_returnsResult() throws Exception{
+        //Arrange
+        LamdenBlockChain testee = new LamdenBlockChain(new TestNet());
+        String contractName = "con_values_testing";
+
+        //Test - String
+        GenericValue genericValueString = testee.readVariable(contractName, "S", "lamden-java-testing,Str");
+        Assertions.assertEquals("a normal string", genericValueString.getValue().toString());
+
+        //Test - String
+        StringValue stringValue = testee.readVariable(contractName, "S", "lamden-java-testing,Str", StringValue.class);
+        Assertions.assertEquals("a normal string", stringValue.getValue());
+
+        //Test - Bool
+        GenericValue genericValueBool = testee.readVariable(contractName, "S", "lamden-java-testing,Bool");
+        Assertions.assertEquals(true, Boolean.valueOf(genericValueBool.getValue().toString()));
+
+        //Test - Bool
+        BooleanValue booleanValue = testee.readVariable(contractName, "S", "lamden-java-testing,Bool", BooleanValue.class);
+        Assertions.assertEquals(true, booleanValue.getValue());
+
+        //Test - Map
+        GenericValue genericValueMap = testee.readVariable(contractName, "S", "lamden-java-testing,Dict");
+        Assertions.assertTrue(((Map<String, Object>)genericValueMap.getValue()).containsKey("item1"));
+
+        //Test - Map
+        MapValue mapValue = testee.readVariable(contractName, "S", "lamden-java-testing,Dict", MapValue.class);
+        Assertions.assertTrue(mapValue.getValue().containsKey("item1"));
+
+        //Test - Float
+        GenericValue genericValueFloat = testee.readVariable(contractName, "S", "lamden-java-testing,Float");
+        Assertions.assertTrue(((Map<String, Object>)genericValueFloat.getValue()).containsKey("__fixed__"));
+
+        //Test - Float
+        FloatValue floatValue = testee.readVariable(contractName, "S", "lamden-java-testing,Float", FloatValue.class);
+        Assertions.assertTrue(floatValue.getValue().compareTo(BigDecimal.ZERO) > 0);
+
+        //Test - Int
+        GenericValue genericValueInt = testee.readVariable(contractName, "S", "lamden-java-testing,Int");
+        Assertions.assertEquals(42, Integer.valueOf(genericValueInt.getValue().toString()));
+
+        //Test - Int
+        IntValue intValue = testee.readVariable(contractName, "S", "lamden-java-testing,Int", IntValue.class);
+        Assertions.assertEquals(42, intValue.getValue());
+
+        //Test - List
+        GenericValue genericValueList = testee.readVariable(contractName, "S", "lamden-java-testing,List");
+        Assertions.assertEquals("item1", ((List<String>)genericValueList.getValue()).get(0));
+
+        //Test - List
+        ListValue<String> listValue = testee.readVariable(contractName, "S", "lamden-java-testing,List", ListValue.class);
+        Assertions.assertEquals("item1", listValue.getValue().get(0));
+
+        //Test - DateTime
+        GenericValue genericValueDateTime = testee.readVariable(contractName, "S", "lamden-java-testing,DateTime");
+        Assertions.assertEquals(6, ((ArrayList<Integer>)genericValueDateTime.getValue()).size());
+
+        //Test - DateTime
+        DateTimeValue dateTimeValue = testee.readVariable(contractName, "S", "lamden-java-testing,DateTime", DateTimeValue.class);
+        Assertions.assertEquals(2020, dateTimeValue.getValue().getYear());
+
+        //Test - TimeDelta
+        GenericValue genericValueTimedelta = testee.readVariable(contractName, "S", "lamden-java-testing,TimeDelta");
+        Assertions.assertEquals(7, ((ArrayList<Integer>)genericValueTimedelta.getValue()).size());
+
+        //Test - TimeDelta
+        TimeDeltaValue timeDeltaValue = testee.readVariable(contractName, "S", "lamden-java-testing,TimeDelta", TimeDeltaValue.class);
+        Assertions.assertEquals(1, timeDeltaValue.getWeeks());
+
+    }
+
+    @Test
+    //@Disabled("Cannot send transaction because of missing funds on testnet")
     void sendTransaction() {
         LamdenWallet testee = new LamdenWallet();
         KeyPair keyPair = testee.generateKeyPairFromPrivateKey("c3a542e8a03067781f6b1352bf9b3fbeb65c6fa54cf0da5b1815a477ea656147");
@@ -224,23 +294,23 @@ class LamdenBlockChainTest {
 
 
         Map<String, Object> args = new HashMap<>();
-        args.put("Str", "a normal string");
-        args.put("Bool", true);
+        args.put("Str", new StringValue("a normal string"));
+        args.put("Bool", new BooleanValue(true));
         args.put("DateTime", new DateTimeValue(2020, 6, 28, 19, 16, 35));
         args.put("TimeDelta", new TimeDeltaValue(1,4,12, 8, 13,30,199));
 
         Map<String, Object> dictMap = new HashMap<>();
         dictMap.put("item1", Collections.singletonMap("item2", "value2"));
-        args.put("Dict", dictMap);
+        args.put("Dict", new MapValue(dictMap));
 
         args.put("Float", new FloatValue(new BigDecimal("3.1415")));
-        args.put("Int", 42);
-        args.put("ANY", "it's me");
+        args.put("Int", new IntValue(42));
+        args.put("ANY", new StringValue("it's me"));
 
         List<String> stringList = Arrays.asList("item1", "item2");
-        args.put("List", stringList);
+        args.put("List", new ListValue(stringList));
 
-        args.put("UID", "lamden-java-testing");
+        args.put("UID", new StringValue("lamden-java-testing"));
 
 
         TransactionInfo tx = TransactionInfo.builder()

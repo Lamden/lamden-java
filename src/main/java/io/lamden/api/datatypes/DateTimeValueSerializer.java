@@ -9,6 +9,16 @@ import java.io.IOException;
 class DateTimeValueSerializer extends JsonSerializer<DateTimeValue> {
     @Override
     public void serialize(DateTimeValue dateTimeValue, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-        jsonGenerator.writeArray(dateTimeValue.getDateTimeArray(), 0, dateTimeValue.getDateTimeArray().length);
+
+        int[] dateTimeArray = new int[]{
+                dateTimeValue.getValue().getYear(),
+                dateTimeValue.getValue().getMonthValue(),
+                dateTimeValue.getValue().getDayOfMonth(),
+                dateTimeValue.getValue().getHour(),
+                dateTimeValue.getValue().getMinute(),
+                dateTimeValue.getValue().getSecond()
+        };
+
+        jsonGenerator.writeArray(dateTimeArray, 0, dateTimeArray.length);
     }
 }

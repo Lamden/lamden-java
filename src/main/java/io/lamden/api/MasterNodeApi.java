@@ -89,7 +89,13 @@ public class MasterNodeApi {
                     StatusLine statusLine = response.getStatusLine();
                     String content = readInputStream(response.getEntity().getContent());
                     if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-                        return mapper.readValue(content, targetType);
+
+                        try {
+                            return mapper.readValue(content, targetType);
+                        }catch(IOException e){
+                            throw new RequestFailedException("Error while parsing response", e);
+                        }
+
                     }else{
                         log.error("Request failed with message: " + content);
                         throw new RequestFailedException("Http request did not respond with Code 200 (returned " + statusLine.getStatusCode() + "), please take a look at the response details", statusLine.getStatusCode(),  content);
@@ -189,7 +195,7 @@ public class MasterNodeApi {
         try{
             return send(request, resultType);
         }catch(RequestFailedException e){
-            if (e.getStatusCode() == HttpStatus.SC_NOT_FOUND){
+            if (e.getStatusCode() != null && e.getStatusCode().intValue() == HttpStatus.SC_NOT_FOUND){
                 return null;
             }else{
                 throw e;

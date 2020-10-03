@@ -7,8 +7,20 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import java.io.IOException;
 
 class TimeDeltaValueSerializer extends JsonSerializer<TimeDeltaValue> {
+
+
+
     @Override
     public void serialize(TimeDeltaValue timeDeltaValue, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-        jsonGenerator.writeArray(timeDeltaValue.getTimeDeltaArray(), 0, timeDeltaValue.getTimeDeltaArray().length);
+        int[] timeDeltaArray = new int[]{
+                timeDeltaValue.getDays(),
+                timeDeltaValue.getSeconds(),
+                timeDeltaValue.getMicroseconds(),
+                timeDeltaValue.getMilliseconds(),
+                timeDeltaValue.getMinutes(),
+                timeDeltaValue.getHours(),
+                timeDeltaValue.getWeeks()};
+
+        jsonGenerator.writeArray(timeDeltaArray, 0, timeDeltaArray.length);
     }
 }
