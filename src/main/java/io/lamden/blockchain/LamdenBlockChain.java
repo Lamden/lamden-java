@@ -6,6 +6,7 @@ import io.lamden.api.datatypes.GenericValue;
 import io.lamden.api.json.constitution.Constitution;
 import io.lamden.api.json.contract.ContractInfoResult;
 import io.lamden.api.json.contract.Contracts;
+import io.lamden.api.json.contract.Variables;
 import io.lamden.api.json.method.MethodsResult;
 import io.lamden.api.json.transaction.TransactionResult;
 
@@ -146,6 +147,17 @@ public class LamdenBlockChain {
         MasterNodeApi masterNodeApi = new MasterNodeApi(network);
         return masterNodeApi.readContracts();
     }
+
+    /**
+     * Returns all state variables and hashes defined in a smart contract
+     * @param contractName name of the contract
+     * @return instance of <tt>Variables</tt> with all variables and hashes of the contract
+     */
+    public Variables readVariables(String contractName){
+        MasterNodeApi masterNodeApi = new MasterNodeApi(network);
+        return masterNodeApi.readVariables(contractName);
+    }
+
 
     /**
      * This is a wrapper method to read the balance of a specified publicKey

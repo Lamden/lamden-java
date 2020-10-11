@@ -7,6 +7,7 @@ import io.lamden.api.datatypes.*;
 import io.lamden.api.json.constitution.Constitution;
 import io.lamden.api.json.contract.ContractInfoResult;
 import io.lamden.api.json.contract.Contracts;
+import io.lamden.api.json.contract.Variables;
 import io.lamden.api.json.method.MethodsResult;
 import io.lamden.api.json.transaction.TransactionResult;
 import io.lamden.blockchain.LamdenBlockChain;
@@ -238,6 +239,20 @@ class LamdenBlockChainTest {
         //Assert
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.getContracts().size() > 0);
+    }
+
+    @Test
+    void readVariables_returnsAllVariables() {
+        //Arrange
+        LamdenBlockChain testee = new LamdenBlockChain(mainnet);
+
+        //Act
+        Variables result = testee.readVariables("con_hopium");
+
+        //Assert
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(2, result.getVariables().size());
+        Assertions.assertEquals(2, result.getHashes().size());
     }
 
 
