@@ -4,6 +4,7 @@ import io.lamden.api.MainNet;
 import io.lamden.api.Network;
 import io.lamden.api.TestNet;
 import io.lamden.api.datatypes.*;
+import io.lamden.api.json.constitution.Constitution;
 import io.lamden.api.json.contract.ContractInfoResult;
 import io.lamden.api.json.method.MethodsResult;
 import io.lamden.api.json.transaction.TransactionResult;
@@ -199,7 +200,7 @@ class LamdenBlockChainTest {
     }
 
     @Test
-    void readCurrencyBalance_nonExistingWallet_returnsAmount() {
+    void readCurrencyBalance_nonExistingWallet_returnsNull() {
         //Arrange
         LamdenBlockChain testee = new LamdenBlockChain(mainnet);
 
@@ -208,6 +209,21 @@ class LamdenBlockChainTest {
 
         //Assert
         Assertions.assertNull(result);
+    }
+
+    @Test
+    void readConstitution_returnsValidResponse() {
+        //Arrange
+        LamdenBlockChain testee = new LamdenBlockChain(mainnet);
+
+        //Act
+        Constitution result = testee.readConstitution();
+
+        //Assert
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.getMasternodes().size() > 0);
+        Assertions.assertTrue(result.getDelegates().size() > 0);
+
     }
 
 

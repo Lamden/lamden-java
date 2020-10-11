@@ -3,6 +3,7 @@ package io.lamden.blockchain;
 import io.lamden.api.MasterNodeApi;
 import io.lamden.api.Network;
 import io.lamden.api.datatypes.GenericValue;
+import io.lamden.api.json.constitution.Constitution;
 import io.lamden.api.json.contract.ContractInfoResult;
 import io.lamden.api.json.method.MethodsResult;
 import io.lamden.api.json.transaction.TransactionResult;
@@ -31,7 +32,7 @@ public class LamdenBlockChain {
      * Creates a <tt>TransactionSender</tt> object, which will be used to send signed transactions
      * to the blockchain
      * @param txInfo the <tt>TransactionInfo</tt> to be sent
-     * @return the created <tt>TransactionSendery</tt>
+     * @return the created <tt>TransactionSender</tt>
      */
     public TransactionSender createTransactionSender(TransactionInfo txInfo){
         return new TransactionSender(this.network, txInfo);
@@ -61,7 +62,7 @@ public class LamdenBlockChain {
      * Reads a variable of a smart contract from the blochchain
      * @param contractName name of the contract
      * @param variableName name of the variable
-     * @return the <tt>ValueResult</tt> if the read operation was successful.
+     * @return the <tt>GenericValue</tt> if the read operation was successful.
      * If the contract or the variable was not found <tt>null</tt> will be returned
      */
     public GenericValue readVariable(String contractName, String variableName){
@@ -73,7 +74,7 @@ public class LamdenBlockChain {
      * @param contractName name of the contract
      * @param variableName name of the variable
      * @param resultType type to be used for deserialization
-     * @return the <tt>ValueResult</tt> if the read operation was successful.
+     * @return the <tt>resultType</tt> if the read operation was successful.
      * If the contract or the variable was not found <tt>null</tt> will be returned
      */
     public <T extends GenericValue> T readVariable(String contractName, String variableName, Class<T> resultType){
@@ -85,7 +86,7 @@ public class LamdenBlockChain {
      * @param contractName name of the contract
      * @param variableName name of the variable
      * @param params name of the param
-     * @return the <tt>ValueResult</tt> if the read operation was successful.
+     * @return the <tt>GenericValue</tt> if the read operation was successful.
      * If the contract, the variable or the param was not found <tt>null</tt> will be returned
      */
     public GenericValue readVariable(String contractName, String variableName, String params){
@@ -99,7 +100,7 @@ public class LamdenBlockChain {
      * @param variableName name of the variable
      * @param params name of the param
      * @param resultType type to be used for deserialization
-     * @return the <tt>ValueResult</tt> if the read operation was successful.
+     * @return the <tt>resultType</tt> if the read operation was successful.
      * If the contract, the variable or the param was not found <tt>null</tt> will be returned
      */
     public <T extends GenericValue> T readVariable(String contractName, String variableName, String params, Class<T> resultType){
@@ -125,6 +126,15 @@ public class LamdenBlockChain {
     public boolean pingServer(){
         MasterNodeApi masterNodeApi = new MasterNodeApi(network);
         return masterNodeApi.pingServer();
+    }
+
+    /**
+     * Reads the ids of all masternodes and delegates currently participating in consensus.
+     * @return <tt>true</tt> if the network is up, <tt>false</tt> if the network is down
+     */
+    public Constitution readConstitution(){
+        MasterNodeApi masterNodeApi = new MasterNodeApi(network);
+        return masterNodeApi.readConstitution();
     }
 
     /**

@@ -6,4 +6,8 @@ public class MasternodesNotAvailableException extends RuntimeException{
         super(message, e);
     }
 
+    public MasternodesNotAvailableException(String message) {
+        super(message);
+    }
+
 }

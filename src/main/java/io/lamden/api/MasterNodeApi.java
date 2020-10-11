@@ -3,6 +3,7 @@ package io.lamden.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.lamden.api.datatypes.FloatValue;
+import io.lamden.api.json.constitution.Constitution;
 import io.lamden.api.json.contract.ContractInfoResult;
 import io.lamden.api.json.method.MethodsResult;
 import io.lamden.api.json.nonce.NonceResult;
@@ -85,19 +86,22 @@ public class MasterNodeApi {
 
         final MasterNodeRequest<T> masterNodeRequest = (HttpRequestBase newRequest) -> {
             try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-                try (CloseableHttpResponse response = client.execute(request)) {
+                try (CloseableHttpResponse response = client.execute(newRequest)) {
                     StatusLine statusLine = response.getStatusLine();
                     String content = readInputStream(response.getEntity().getContent());
                     if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-
                         try {
                             return mapper.readValue(content, targetType);
-                        }catch(IOException e){
+                        } catch (IOException e) {
                             throw new RequestFailedException("Error while parsing response", e);
                         }
-
+                    } else if (statusLine.getStatusCode() >= 500 && statusLine.getStatusCode() <= 599) {
+                        if (log.isTraceEnabled()){
+                            log.trace("Error calling masternode! Response was: " + content);
+                        }
+                        throw new IOException("Http request did not respond with Code " + statusLine.getStatusCode());
                     }else{
-                        log.error("Request failed with message: " + content);
+                        //log.error("Request failed with message: " + content);
                         throw new RequestFailedException("Http request did not respond with Code 200 (returned " + statusLine.getStatusCode() + "), please take a look at the response details", statusLine.getStatusCode(),  content);
                     }
                 }
@@ -240,5 +244,11 @@ public class MasterNodeApi {
             return result.getValue();
         }
 
+    }
+
+    public Constitution readConstitution() {
+        URI uri = network.getMasterNodes().get(0);
+        HttpGet request = new HttpGet( uri.resolve("/constitution/"));
+        return send(request, Constitution.class);
     }
 }
