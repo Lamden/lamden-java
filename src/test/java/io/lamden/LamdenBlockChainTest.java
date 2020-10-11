@@ -6,6 +6,7 @@ import io.lamden.api.TestNet;
 import io.lamden.api.datatypes.*;
 import io.lamden.api.json.constitution.Constitution;
 import io.lamden.api.json.contract.ContractInfoResult;
+import io.lamden.api.json.contract.Contracts;
 import io.lamden.api.json.method.MethodsResult;
 import io.lamden.api.json.transaction.TransactionResult;
 import io.lamden.blockchain.LamdenBlockChain;
@@ -224,6 +225,19 @@ class LamdenBlockChainTest {
         Assertions.assertTrue(result.getMasternodes().size() > 0);
         Assertions.assertTrue(result.getDelegates().size() > 0);
 
+    }
+
+    @Test
+    void readContracts_returnsAllContracts() {
+        //Arrange
+        LamdenBlockChain testee = new LamdenBlockChain(mainnet);
+
+        //Act
+        Contracts result = testee.readContracts();
+
+        //Assert
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.getContracts().size() > 0);
     }
 
 

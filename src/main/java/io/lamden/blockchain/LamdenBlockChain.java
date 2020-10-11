@@ -5,6 +5,7 @@ import io.lamden.api.Network;
 import io.lamden.api.datatypes.GenericValue;
 import io.lamden.api.json.constitution.Constitution;
 import io.lamden.api.json.contract.ContractInfoResult;
+import io.lamden.api.json.contract.Contracts;
 import io.lamden.api.json.method.MethodsResult;
 import io.lamden.api.json.transaction.TransactionResult;
 
@@ -135,6 +136,15 @@ public class LamdenBlockChain {
     public Constitution readConstitution(){
         MasterNodeApi masterNodeApi = new MasterNodeApi(network);
         return masterNodeApi.readConstitution();
+    }
+
+    /**
+     * Returns all the smartcontracts on the Lamden blockchain
+     * @return all <tt>Contracts</tt> with their name
+     */
+    public Contracts readContracts(){
+        MasterNodeApi masterNodeApi = new MasterNodeApi(network);
+        return masterNodeApi.readContracts();
     }
 
     /**

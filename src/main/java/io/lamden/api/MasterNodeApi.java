@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.lamden.api.datatypes.FloatValue;
 import io.lamden.api.json.constitution.Constitution;
 import io.lamden.api.json.contract.ContractInfoResult;
+import io.lamden.api.json.contract.Contracts;
 import io.lamden.api.json.method.MethodsResult;
 import io.lamden.api.json.nonce.NonceResult;
 import io.lamden.api.json.transaction.TransactionResult;
@@ -168,6 +169,21 @@ public class MasterNodeApi {
         byte[] byteArray = buffer.toByteArray();
 
         return new String(byteArray, StandardCharsets.UTF_8);
+    }
+
+    public Contracts readContracts() {
+        URI uri = network.getMasterNodes().get(0);
+        HttpGet request = new HttpGet( uri.resolve("/contracts"));
+
+        try{
+            return send(request, Contracts.class);
+        }catch(RequestFailedException e){
+            if (e.getStatusCode() == HttpStatus.SC_NOT_FOUND){
+                return null;
+            }else{
+                throw e;
+            }
+        }
     }
 
     public ContractInfoResult readContractInfo(String contractName) {
