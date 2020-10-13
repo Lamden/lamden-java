@@ -5,5 +5,5 @@ import org.apache.http.client.methods.HttpRequestBase;
 import java.io.IOException;
 
 public interface MasterNodeRequest<T> {
-    T call(HttpRequestBase newRequest) throws IOException;
+    T call(MasterNode masterNode, HttpRequestBase newRequest) throws IOException;
 }

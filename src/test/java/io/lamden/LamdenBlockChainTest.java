@@ -1,6 +1,7 @@
 package io.lamden;
 
 import io.lamden.api.MainNet;
+import io.lamden.api.MasterNode;
 import io.lamden.api.Network;
 import io.lamden.api.TestNet;
 import io.lamden.api.datatypes.*;
@@ -26,7 +27,7 @@ import java.util.*;
 
 class LamdenBlockChainTest {
     
-    private final Network mainnet = new MainNet();
+    private static final Network mainnet = new MainNet(1, 60);
 
     @Test
     void readTransactionResult_existing_returnsResult(){
@@ -170,9 +171,9 @@ class LamdenBlockChainTest {
         Network myNetwork = new MainNet();
         myNetwork.setMasterNodes(
                 Arrays.asList(
-                        new URI("https://masternode-01.lambo.io"),
-                        new URI("https://masternode-02.lambo.io"),
-                        new URI("https://masternode-03.lambo.io")
+                        new MasterNode(new URI("https://masternode-01.lambo.io"), 5, 300),
+                        new MasterNode(new URI("https://masternode-02.lambo.io"), 5, 300),
+                        new MasterNode(new URI("https://masternode-03.lambo.io"), 5, 300)
                         )
         );
 
@@ -186,7 +187,6 @@ class LamdenBlockChainTest {
 
         //Assert
         Assertions.assertTrue(exception.getMessage().endsWith(" could not be processed despite 2 retries!"));
-
     }
 
     @Test

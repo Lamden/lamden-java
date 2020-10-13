@@ -12,16 +12,22 @@ import java.util.List;
 @Slf4j
 public class MainNet implements Network{
 
-    private List<URI> masternodes = new ArrayList<>();
+    private List<MasterNode> masternodes = new ArrayList<>();
 
-    public MainNet() {
+    public MainNet(int retriesUntilUnhealthy, int healthCheckTimeSpanSeconds){
         try {
-            masternodes.add(new URI("https://masternode-01.lamden.io"));
-            masternodes.add(new URI("https://masternode-02.lamden.io"));
+            masternodes.add(new MasterNode(new URI("https://masternode-01.lamden.io"), retriesUntilUnhealthy, healthCheckTimeSpanSeconds));
+            masternodes.add(new MasterNode(new URI("https://masternode-02.lamden.io"), retriesUntilUnhealthy, healthCheckTimeSpanSeconds));
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("No valid URI for masternode");
         }
     }
+
+    public MainNet(){
+        this(5, 300);
+    }
+
+
 
     @Override
     public String getName() {
@@ -29,12 +35,12 @@ public class MainNet implements Network{
     }
 
     @Override
-    public List<URI> getMasterNodes() {
+    public List<MasterNode> getMasterNodes() {
         return masternodes;
     }
 
     @Override
-    public void setMasterNodes(List<URI> masternodes) {
+    public void setMasterNodes(List<MasterNode> masternodes) {
         this.masternodes = masternodes;
     }
 

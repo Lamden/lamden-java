@@ -48,14 +48,14 @@ public class MasterNodeApi {
     }
 
     public NonceResult readNonce(String senderPublicKey) {
-        URI uri = network.getMasterNodes().get(0);
+        URI uri = getFirstMasterNodeUri();
         HttpGet request = new HttpGet(uri.resolve("/nonce/" + senderPublicKey));
 
         return send(request, NonceResult.class);
     }
 
     public TransactionResult readTransaction(String hash) {
-        URI uri = network.getMasterNodes().get(0);
+        URI uri = getFirstMasterNodeUri();
         HttpGet request = new HttpGet( uri.resolve("/tx?hash=" + hash));
 
         try{
@@ -72,7 +72,7 @@ public class MasterNodeApi {
 
     @SuppressWarnings("unchecked")
     public Map<String, Object> sendTransaction(Map<String, Object> data) {
-        String host = network.getMasterNodes().get(0).toString();
+        String host = getFirstMasterNodeUri().toString();
         HttpPost request = new HttpPost(host);
 
         try {
@@ -86,7 +86,7 @@ public class MasterNodeApi {
 
     public <T> T send(HttpRequestBase request, Class<T> targetType) {
 
-        final MasterNodeRequest<T> masterNodeRequest = (HttpRequestBase newRequest) -> {
+        final MasterNodeRequest<T> masterNodeRequest = (MasterNode masterNode, HttpRequestBase newRequest) -> {
             try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
                 try (CloseableHttpResponse response = client.execute(newRequest)) {
                     StatusLine statusLine = response.getStatusLine();
@@ -101,6 +101,8 @@ public class MasterNodeApi {
                         if (log.isTraceEnabled()){
                             log.trace("Error calling masternode! Response was: " + content);
                         }
+
+                        masterNode.reportUnhealthy();
                         throw new IOException("Http request did not respond with Code " + statusLine.getStatusCode());
                     }else{
                         //log.error("Request failed with message: " + content);
@@ -114,9 +116,10 @@ public class MasterNodeApi {
 
     }
 
-    <T> T runWithRetries(List<URI> masterNodes, HttpRequestBase request, MasterNodeRequest<T> t, Class<T> targetType) {
+    <T> T runWithRetries(List<MasterNode> masterNodes, HttpRequestBase request, MasterNodeRequest<T> t, Class<T> targetType) {
 
-        List<Integer> indexes = IntStream.rangeClosed(0, masterNodes.size()-1).boxed().collect(Collectors.toList());
+        List<MasterNode> healthyMasternodes = masterNodes.stream().filter(m -> m.isHealthy()).collect(Collectors.toList());
+        List<Integer> indexes = IntStream.rangeClosed(0, healthyMasternodes.size()-1).boxed().collect(Collectors.toList());
         Collections.shuffle(indexes);
 
         URI uri = request.getURI();
@@ -128,9 +131,10 @@ public class MasterNodeApi {
             URI newUri = null;
 
             try {
-                newUri = replaceHost(uri, masterNodes.get(currentIndex).getHost());
+                MasterNode masterNode = healthyMasternodes.get(currentIndex);
+                newUri = replaceHost(uri, masterNode.getUri().getHost());
                 request.setURI(newUri);
-                return t.call(request);
+                return t.call(masterNode, request);
 
             } catch (URISyntaxException e) {
                 throw new IllegalArgumentException("URI is not valid: " + uri);
@@ -173,7 +177,7 @@ public class MasterNodeApi {
     }
 
     public Contracts readContracts() {
-        URI uri = network.getMasterNodes().get(0);
+        URI uri = getFirstMasterNodeUri();
         HttpGet request = new HttpGet( uri.resolve("/contracts"));
 
         try{
@@ -188,7 +192,7 @@ public class MasterNodeApi {
     }
 
     public Variables readVariables(String contractName) {
-        URI uri = network.getMasterNodes().get(0);
+        URI uri = getFirstMasterNodeUri();
         HttpGet request = new HttpGet( uri.resolve("/contracts/" + contractName + "/variables"));
 
         try{
@@ -202,8 +206,12 @@ public class MasterNodeApi {
         }
     }
 
+    private URI getFirstMasterNodeUri() {
+        return network.getMasterNodes().get(0).getUri();
+    }
+
     public ContractInfoResult readContractInfo(String contractName) {
-        URI uri = network.getMasterNodes().get(0);
+        URI uri = getFirstMasterNodeUri();
         HttpGet request = new HttpGet( uri.resolve("/contracts/" + contractName));
 
         try{
@@ -218,7 +226,7 @@ public class MasterNodeApi {
     }
 
     public <T> T readVariable(String contractName, String variableName, String params, Class<T> resultType) {
-        URI uri = network.getMasterNodes().get(0);
+        URI uri = getFirstMasterNodeUri();
 
         if (params != null && !params.trim().isEmpty()){
             uri = uri.resolve("/contracts/" + contractName + "/" + variableName + "?key=" + params);
@@ -240,7 +248,7 @@ public class MasterNodeApi {
     }
 
     public MethodsResult readContractMethods(String contractName) {
-        URI uri = network.getMasterNodes().get(0);
+        URI uri = getFirstMasterNodeUri();
         HttpGet request = new HttpGet(uri.resolve("/contracts/" + contractName + "/methods"));
 
         try{
@@ -255,7 +263,7 @@ public class MasterNodeApi {
     }
 
     public boolean pingServer() {
-        URI uri = network.getMasterNodes().get(0);
+        URI uri = getFirstMasterNodeUri();
         HttpGet request = new HttpGet( uri.resolve("/ping/"));
 
         try{
@@ -279,7 +287,7 @@ public class MasterNodeApi {
     }
 
     public Constitution readConstitution() {
-        URI uri = network.getMasterNodes().get(0);
+        URI uri = getFirstMasterNodeUri();
         HttpGet request = new HttpGet( uri.resolve("/constitution/"));
         return send(request, Constitution.class);
     }

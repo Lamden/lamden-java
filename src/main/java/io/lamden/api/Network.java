@@ -5,6 +5,6 @@ import java.util.List;
 
 public interface Network {
     String getName();
-    List<URI> getMasterNodes();
-    void setMasterNodes(List<URI> masternodes);
+    List<MasterNode> getMasterNodes();
+    void setMasterNodes(List<MasterNode> masternodes);
 }
