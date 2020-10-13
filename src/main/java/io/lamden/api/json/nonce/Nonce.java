@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
         "processor",
         "sender"
 })
-public class NonceResult {
+public class Nonce {
 
     @JsonProperty("nonce")
     private Integer nonce;
@@ -30,7 +30,7 @@ public class NonceResult {
      * No args constructor for use in serialization
      *
      */
-    public NonceResult() {
+    public Nonce() {
     }
 
     /**
@@ -39,7 +39,7 @@ public class NonceResult {
      * @param nonce
      * @param processor
      */
-    public NonceResult(Integer nonce, String processor, String sender) {
+    public Nonce(Integer nonce, String processor, String sender) {
         super();
         this.nonce = nonce;
         this.processor = processor;

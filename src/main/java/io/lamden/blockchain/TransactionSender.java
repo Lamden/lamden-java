@@ -6,7 +6,7 @@ import io.lamden.api.Network;
 import io.lamden.exception.RequestFailedException;
 import io.lamden.common.Signer;
 import io.lamden.api.MasterNodeApi;
-import io.lamden.api.json.nonce.NonceResult;
+import io.lamden.api.json.nonce.Nonce;
 import io.lamden.exception.TransactionFailedException;
 import io.lamden.utils.HexUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class TransactionSender {
@@ -47,9 +46,9 @@ public class TransactionSender {
 
         if (txInfo.getNonce() == 0 || txInfo.getProcessor() == null || txInfo.getProcessor().isEmpty()){
             //get nonce
-            NonceResult nonceResult = this.readNonce();
-            txInfo.setNonce(nonceResult.getNonce());
-            txInfo.setProcessor(nonceResult.getProcessor());
+            Nonce nonce = this.readNonce();
+            txInfo.setNonce(nonce.getNonce());
+            txInfo.setProcessor(nonce.getProcessor());
         }
 
         //make payload
@@ -128,7 +127,7 @@ public class TransactionSender {
 
     }
 
-    private NonceResult readNonce() {
+    private Nonce readNonce() {
         return api.readNonce(txInfo.getSenderPublicKey());
     }
 }

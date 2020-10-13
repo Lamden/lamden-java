@@ -4,10 +4,10 @@ import io.lamden.api.MasterNodeApi;
 import io.lamden.api.Network;
 import io.lamden.api.datatypes.GenericValue;
 import io.lamden.api.json.constitution.Constitution;
-import io.lamden.api.json.contract.ContractInfoResult;
+import io.lamden.api.json.contract.ContractInfo;
 import io.lamden.api.json.contract.Contracts;
 import io.lamden.api.json.contract.Variables;
-import io.lamden.api.json.method.MethodsResult;
+import io.lamden.api.json.method.Methods;
 import io.lamden.api.json.transaction.TransactionResult;
 
 import java.math.BigDecimal;
@@ -55,7 +55,7 @@ public class LamdenBlockChain {
      * @param contractName name of the contract
      * @return the <tt>ContractInfoResult</tt> including the whole contract code
      */
-    public ContractInfoResult readContractInfo(String contractName){
+    public ContractInfo readContractInfo(String contractName){
         MasterNodeApi masterNodeApi = new MasterNodeApi(network);
         return masterNodeApi.readContractInfo(contractName);
     }
@@ -116,7 +116,7 @@ public class LamdenBlockChain {
      * @return the <tt>MethodsResult</tt> if the read operation was successful.
      * If the contract was not found, <tt>null</tt> will be returned
      */
-    public MethodsResult readContractMethods(String contractName){
+    public Methods readContractMethods(String contractName){
         MasterNodeApi masterNodeApi = new MasterNodeApi(network);
         return masterNodeApi.readContractMethods(contractName);
     }
@@ -153,9 +153,9 @@ public class LamdenBlockChain {
      * @param contractName name of the contract
      * @return instance of <tt>Variables</tt> with all variables and hashes of the contract
      */
-    public Variables readVariables(String contractName){
+    public Variables readContractVariables(String contractName){
         MasterNodeApi masterNodeApi = new MasterNodeApi(network);
-        return masterNodeApi.readVariables(contractName);
+        return masterNodeApi.readContractVariables(contractName);
     }
 
 

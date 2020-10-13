@@ -1,8 +1,6 @@
-
-package io.lamden.api.json.method;
+package io.lamden.api.json.contract;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -13,39 +11,54 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "methods"
+        "name",
+        "code"
 })
-public class MethodsResult {
+public class ContractInfo {
 
-    @JsonProperty("methods")
-    private List<Method> methods = null;
+    @JsonProperty("name")
+    private String name;
+    @JsonProperty("code")
+    private String code;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     /**
      * No args constructor for use in serialization
-     * 
+     *
      */
-    public MethodsResult() {
+    public ContractInfo() {
     }
 
     /**
-     * 
-     * @param methods
+     *
+     * @param code
+     * @param name
      */
-    public MethodsResult(List<Method> methods) {
+    public ContractInfo(String name, String code) {
         super();
-        this.methods = methods;
+        this.name = name;
+        this.code = code;
     }
 
-    @JsonProperty("methods")
-    public List<Method> getMethods() {
-        return methods;
+    @JsonProperty("name")
+    public String getName() {
+        return name;
     }
 
-    @JsonProperty("methods")
-    public void setMethods(List<Method> methods) {
-        this.methods = methods;
+    @JsonProperty("name")
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @JsonProperty("code")
+    public String getCode() {
+        return code;
+    }
+
+    @JsonProperty("code")
+    public void setCode(String code) {
+        this.code = code;
     }
 
     @JsonAnyGetter

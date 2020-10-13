@@ -6,10 +6,10 @@ import io.lamden.api.Network;
 import io.lamden.api.TestNet;
 import io.lamden.api.datatypes.*;
 import io.lamden.api.json.constitution.Constitution;
-import io.lamden.api.json.contract.ContractInfoResult;
+import io.lamden.api.json.contract.ContractInfo;
 import io.lamden.api.json.contract.Contracts;
 import io.lamden.api.json.contract.Variables;
-import io.lamden.api.json.method.MethodsResult;
+import io.lamden.api.json.method.Methods;
 import io.lamden.api.json.transaction.TransactionResult;
 import io.lamden.blockchain.LamdenBlockChain;
 import io.lamden.blockchain.TransactionInfo;
@@ -62,10 +62,10 @@ class LamdenBlockChainTest {
         String contractName = "currency";
 
         //Act
-        ContractInfoResult contractInfoResult = testee.readContractInfo(contractName);
+        ContractInfo contractInfo = testee.readContractInfo(contractName);
 
         //Assert
-        Assertions.assertEquals(contractName, contractInfoResult.getName());
+        Assertions.assertEquals(contractName, contractInfo.getName());
     }
 
     @Test
@@ -74,10 +74,10 @@ class LamdenBlockChainTest {
         LamdenBlockChain testee = new LamdenBlockChain(mainnet);
 
         //Act
-        ContractInfoResult contractInfoResult = testee.readContractInfo("currrrrrency");
+        ContractInfo contractInfo = testee.readContractInfo("currrrrrency");
 
         //Assert
-        Assertions.assertNull(contractInfoResult);
+        Assertions.assertNull(contractInfo);
     }
 
     @Test
@@ -134,7 +134,7 @@ class LamdenBlockChainTest {
         String contractName = "currency";
 
         //Act
-        MethodsResult result = testee.readContractMethods(contractName);
+        Methods result = testee.readContractMethods(contractName);
 
         //Assert
         Assertions.assertEquals(5, result.getMethods().size());
@@ -147,7 +147,7 @@ class LamdenBlockChainTest {
         String contractName = "currrrrrrency";
 
         //Act
-        MethodsResult result = testee.readContractMethods(contractName);
+        Methods result = testee.readContractMethods(contractName);
 
         //Assert
         Assertions.assertNull(result);
@@ -247,7 +247,7 @@ class LamdenBlockChainTest {
         LamdenBlockChain testee = new LamdenBlockChain(mainnet);
 
         //Act
-        Variables result = testee.readVariables("con_hopium");
+        Variables result = testee.readContractVariables("con_hopium");
 
         //Assert
         Assertions.assertNotNull(result);

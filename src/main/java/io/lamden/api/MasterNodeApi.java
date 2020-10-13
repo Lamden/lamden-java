@@ -4,11 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.lamden.api.datatypes.FloatValue;
 import io.lamden.api.json.constitution.Constitution;
-import io.lamden.api.json.contract.ContractInfoResult;
+import io.lamden.api.json.contract.ContractInfo;
 import io.lamden.api.json.contract.Contracts;
 import io.lamden.api.json.contract.Variables;
-import io.lamden.api.json.method.MethodsResult;
-import io.lamden.api.json.nonce.NonceResult;
+import io.lamden.api.json.method.Methods;
+import io.lamden.api.json.nonce.Nonce;
 import io.lamden.api.json.transaction.TransactionResult;
 import io.lamden.exception.MasternodesNotAvailableException;
 import io.lamden.exception.RequestFailedException;
@@ -47,11 +47,11 @@ public class MasterNodeApi {
         this.network = network;
     }
 
-    public NonceResult readNonce(String senderPublicKey) {
+    public Nonce readNonce(String senderPublicKey) {
         URI uri = getFirstMasterNodeUri();
         HttpGet request = new HttpGet(uri.resolve("/nonce/" + senderPublicKey));
 
-        return send(request, NonceResult.class);
+        return send(request, Nonce.class);
     }
 
     public TransactionResult readTransaction(String hash) {
@@ -191,7 +191,7 @@ public class MasterNodeApi {
         }
     }
 
-    public Variables readVariables(String contractName) {
+    public Variables readContractVariables(String contractName) {
         URI uri = getFirstMasterNodeUri();
         HttpGet request = new HttpGet( uri.resolve("/contracts/" + contractName + "/variables"));
 
@@ -210,12 +210,12 @@ public class MasterNodeApi {
         return network.getMasterNodes().get(0).getUri();
     }
 
-    public ContractInfoResult readContractInfo(String contractName) {
+    public ContractInfo readContractInfo(String contractName) {
         URI uri = getFirstMasterNodeUri();
         HttpGet request = new HttpGet( uri.resolve("/contracts/" + contractName));
 
         try{
-            return send(request, ContractInfoResult.class);
+            return send(request, ContractInfo.class);
         }catch(RequestFailedException e){
             if (e.getStatusCode() == HttpStatus.SC_NOT_FOUND){
                 return null;
@@ -247,12 +247,12 @@ public class MasterNodeApi {
         }
     }
 
-    public MethodsResult readContractMethods(String contractName) {
+    public Methods readContractMethods(String contractName) {
         URI uri = getFirstMasterNodeUri();
         HttpGet request = new HttpGet(uri.resolve("/contracts/" + contractName + "/methods"));
 
         try{
-            return send(request, MethodsResult.class);
+            return send(request, Methods.class);
         }catch(RequestFailedException e){
             if (e.getStatusCode() == HttpStatus.SC_NOT_FOUND){
                 return null;
