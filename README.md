@@ -67,7 +67,7 @@ When interacting with the Lamden blockchain there are several supported datatype
 | string    	| StringValue    	|
 | timedelta 	| TimeDeltaValue 	|
 
-* The `GenericValue` Class can be used to use raw json values for communication.
+\* The `GenericValue` Class can be used to use raw json values for communication.
 
 **It's recommended to use the appropriate `Value`-class to ensure correct marshalling/unmarshalling of the different datatypes.**
 
@@ -96,6 +96,10 @@ You can customize these parameters by calling the appropriate constructor:
 Network mainnet = new MainNet(2, 180);
 LamdenBlockChain blockchain = new LamdenBlockChain(mainnet);
 ```
+
+You should only create a single instance of `MainNet` or `TestNet` and always reuse the same instance.
+Otherwise you will lose the state of the masternodes health. 
+
 
 ### Reading Transactions
 
